@@ -1,0 +1,3 @@
+//home/Michael/war/build/CMakeFiles/edit_cache.dir
+//home/Michael/war/build/CMakeFiles/rebuild_cache.dir
+//home/Michael/war/build/CMakeFiles/war.dir

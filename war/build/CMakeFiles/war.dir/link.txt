@@ -1,0 +1,1 @@
+/usr/bin/c++   -std=c++1z   CMakeFiles/war.dir/main.cpp.o CMakeFiles/war.dir/card.cpp.o  -o war -rdynamic 
