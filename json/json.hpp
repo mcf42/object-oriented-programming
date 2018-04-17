@@ -4,4 +4,13 @@
 #include <map>
 #include <vector>
 
-// TODO: Write your JSON class hierarchy here.
+base class value {
+	virtual function print
+
+	derived class true
+	derived class false
+	derived class null
+	derived class string
+	derived class array
+	derived class object
+};
