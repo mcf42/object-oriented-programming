@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <cassert>
@@ -6,8 +5,6 @@
 #include <iosfwd>
 #include <iostream>
 
-// Defines a new type (user-defined type). Sometimes called
-// a kind of type constructor (ignore that).
 enum Rank {
   Ace,
   Two,
@@ -24,7 +21,6 @@ enum Rank {
   King,
 };
 
-// Represents the suits of a card.
 enum Suit {
   Spades,
   Clubs, 
@@ -36,131 +32,89 @@ enum Color {
   Black, Red
 };
 
-
-// Declares the base class. This class
-// abstractly represents the set of all
-// cards. There is no object that is not
-// one of the derived classes.
-class Card
+class StandardCard
 {
 public:
-  // Just a regular constructor...
-  Card(int n)
-    : id(n)
-  { }
+  StandardCard() = default;
 
-  // Ignore me...
-  virtual ~Card() = default;
-
-  // Goal: somebody calls clone and gets a new
-  // Card of the same dynamic type and having
-  // the same value.
-  //
-  // This is a virtual function. Calling a virtual
-  // function actually calls an overridden version
-  // of this function. Which override? The one
-  // in the dynamic type of the object on which
-  // the function is called.
-  //
-  // This actually called "virtual constructor".
-  // virtual Card* clone() { throw std::logic_error("oops"); }
-
-  // This is called a *pure virtual function*.
-  // Pure virtual functions *must* be overridden in
-  // a derived class.
-  virtual Card* clone() = 0;
-
-
-  int get_id() const { return id; }
-
-  // Just for fun... uniquely number
-  // each card in the deck.
-  int id;
-};
-
-// Declares a derived class. We often say
-// that Standard IS-A Card.
-class StandardCard : public Card
-{
-public:
-  // We "inherit" the members of the base
-  // class (almost as if) they were declared
-  // here.
-  // int id;
-
-  // Just a regular constructor... but.
-  // You can call a base class constructor
-  // explicitly in the member initializer
-  // list.
-  StandardCard(int n, Rank r, Suit s)
-    : Card(n), rank(r), suit(s)
-  { }
-
-  // This is an *override* of clone.
-  Card* clone() override {
-    return new StandardCard(*this);
-  }
+  StandardCard(Rank r, Suit s)
+  	: rank(r), suit(s)
+  {}
 
   Rank get_rank() const { return rank; }
   Suit get_suit() const { return suit; }
 
+private:
   Rank rank;
   Suit suit;
 };
 
-// Declares another derived class.
-class JokerCard : public Card
+class JokerCard
 {
 public:
-  JokerCard(int n, Color c)
-    : Card(n), color(c)
-  { }
+  JokerCard(Color c)
+  	: color(c)
+  {}
 
-  // An *override* of Card::clone.
-  Card* clone() override {
-    return new JokerCard(*this);
-  }
+  Color get_color() const { return color;}
 
+private:
   Color color;
 };
 
-
-
-// The deck is THE OWNER of the cards it is
-// initialized with. To own an object means to
-// control its lifetime (i.e., this class
-// deletes the owned objects).
-class Deck : public std::vector<Card*>
+class Card
 {
 public:
-  Deck(std::initializer_list<Card*> list)
-    : std::vector<Card*>(list)
-  { }
+  enum Kind {
+  	Standard,
+  	Joker
+  };
 
-  Deck(const Deck& d)
-  {
-    for (Card* c : d) {
-      push_back(c->clone());
+private:
+	union Value {
+		Value(StandardCard c) : sc(c) {}
+		Value(JokerCard c) : jc(c) {}
 
-      // std::cout << c << '\n';
-      // if (StandardCard* sc = dynamic_cast<StandardCard*>(c))
-      //   push_back(new StandardCard(*sc));
-      // else if (JokerCard* jc = dynamic_cast<JokerCard*>(c))
-      //   push_back(new JokerCard(*jc));
-      // else
-      //   throw std::logic_error("unknown card");
+		StandardCard sc;
+		JokerCard sc;
+	}
 
-      // if (the dynamic type of c is StandardCard)
-      //   push_back(new StandardCard(...));
-      // if (the dynamic type of c is JokerCard)
-      //   push_back(new JokerCard(...));
-    }
-  }
+public:
+	Card(StandardCard c)
+		: kind(Standard), val(c)
+	{}
 
-  ~Deck() {
-    for (Card* c : *this)
-      delete c;
-  }
+	Card(JokerCard c)
+		: kind (Joker), val(c)
+	{}
+
+	Kind get_kind() const { return kind; }
+ 	bool is_standard() const { return kind == Standard; }
+ 	bool is_joker() const { return kind == Joker; }
+
+ 	StandardCard get_standard_card() const {
+ 		assert(is_standard());
+ 		return val.sc;
+ 	}
+
+ 	JokerCard get_joker_card() const {
+ 		assert(is_joker());
+ 		return val.jc;
+ 	}
+
+ 	Suit get_suit() const {
+ 		return get_standard_card().get_suit();
+ 	}
+
+ 	Rank get_rank() const {
+ 		return get_standard_card().get_rank();
+ 	}
+
+ 	Color get_color() const {
+ 		return get_joker_card().get_color();
+ 	}
+
+private:
+	Kind kind;
+	Value val;
 };
-
-Deck get_deck();

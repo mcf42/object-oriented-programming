@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <cassert>
@@ -17,19 +16,6 @@ public:
   {
     for (Card* c : d) {
       push_back(c->clone());
-
-      // std::cout << c << '\n';
-      // if (StandardCard* sc = dynamic_cast<StandardCard*>(c))
-      //   push_back(new StandardCard(*sc));
-      // else if (JokerCard* jc = dynamic_cast<JokerCard*>(c))
-      //   push_back(new JokerCard(*jc));
-      // else
-      //   throw std::logic_error("unknown card");
-
-      // if (the dynamic type of c is StandardCard)
-      //   push_back(new StandardCard(...));
-      // if (the dynamic type of c is JokerCard)
-      //   push_back(new JokerCard(...));
     }
   }
 
@@ -40,4 +26,3 @@ public:
 };
 
 Deck get_deck();
-
