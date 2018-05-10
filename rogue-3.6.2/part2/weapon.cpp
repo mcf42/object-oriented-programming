@@ -1,64 +1,13 @@
-// new c++ class for weapons
+// implementation for weapons
 // michael fiander
 
-static int MAXWEAPONS = 12;
-
-class weapon {
-private:
-	//possible types of weapons
-	std::string weapon_names[MAXWEAPONS] = {
-		"mace",
-		"long sword",
-		"short bow",
-		"arrow",
-		"dagger",
-		"rock",
-		"two handed sword",
-		"sling",
-		"dart",
-		"crossbow",
-		"crossbow bolt",
-		"spear",
-	}
-
-	//initial weapon stats
-	static struct initial_weapons {
-		char *iw_dam; //damage
-		char *iw_hrl; //hurl damage
-		char iw_launch; //what it launches with
-		int iw_flags;
-	} init_dam[MAXWEAPONS] = {
-		"2d4", "1d3", NONE, 0, //Mace
-		"1d10", "1d2", NONE,0, //Long sword
-		"1d1", "1d1", NONE,	0, //Bow
-		"1d1", "1d6", BOW,	ISMANY|ISMISL, //Arrow
-		"1d6", "1d4", NONE,	ISMISL, //Dagger
-		"1d2", "1d4", SLING,ISMANY|ISMISL, //Rock
-		"3d6", "1d2", NONE,	0, //2h sword
-		"0d0", "0d0", NONE, 0, //Sling
-		"1d1", "1d3", NONE,	ISMANY|ISMISL, //Dart
-		"1d1", "1d1", NONE, 0, //Crossbow
-		"1d2", "1d10", CROSSBOW, ISMANY|ISMISL, //Crossbow bolt
-		"1d8", "1d6", NONE, ISMISL, //Spear
-	}
-
-public:
-	void missile(int, int);
-	void do_motion(register struct object, register int,
-		register int);
-	void fall(register struct linked_list*, bool);
-	void init_weapon(register struct object*, char type);
-	void hit_monster(register int, register int, struct object*);
-	char * num(register int, register int);
-	void wield();
-	void fallpos(register coord *, register coord *, register bool);
-};
-
+#include "item.hpp"
+#include "rogue.hpp"
 
 void weapon::missile(int ydelta, int xdelta)
 {
-	register struct object *obj;
-	register struct linked_list *item, *nitem;
+	struct object *obj;
+	struct linked_list *item, *nitem;
 
 	//get which item we are hurling
 	if ((item = get_item("throw", WEAPON)) == NULL) {
@@ -99,12 +48,12 @@ void weapon::missile(int ydelta, int xdelta)
 
 //do the motion on the screen done by an object traveling
 //across the room
-void weapon::do_motion(register struct object *obj, register int ydelta,
-	register int xdelta) {
+void weapon::do_motion(struct object *obj, int ydelta,
+	int xdelta) {
 	//fly!
 	obj->o_pos = hero;
 	for (;;) {
-		register int ch;
+		int ch;
 		//erase the old one
 		if (!ce(obj->o_pos, hero) && cansee(unc(obj->o_pos))
 			&& mvwinch(cw, obj->o_pos.y, obj->o_pos.x) != ' ') {
@@ -129,9 +78,9 @@ void weapon::do_motion(register struct object *obj, register int ydelta,
 }
 
 //drop an item someplace
-void weapon::fall(register struct linked_list *item, bool pr) {
-	register struct object *obj;
-	register struct room *rp;
+void weapon::fall(struct linked_list *item, bool pr) {
+	struct object *obj;
+	struct room *rp;
 	static coord fpos;
 
 	obj = (struct object *) ldata(item);
@@ -152,8 +101,8 @@ void weapon::fall(register struct linked_list *item, bool pr) {
 }
 
 //set up initial stats for a weapon
-void weapon::init_weapon(register struct object *weap, char type) {
-	register struct init_weaps *iwp;
+void weapon::init_weapon(struct object *weap, char type) {
+	struct init_weaps *iwp;
 
 	iwp = &init_dam[type];
 	strcpy(weap->o_damage,iwp->iw_dam);
@@ -170,7 +119,7 @@ void weapon::init_weapon(register struct object *weap, char type) {
 }
 
 //does the missile hit monster
-void weapon::hit_monster(register int y, register int x, struct object *obj) {
+void weapon::hit_monster(int y, int x, struct object *obj) {
 static coord mp;
 
 mp.y = y;
@@ -179,7 +128,7 @@ return fight(&mp, winat(y, x), obj, TRUE);
 }
 
 //figure out the plus number for armor/weapons
-char * weapon::num(register int n1, register int n2) {
+char * weapon::num(int n1, int n2) {
 	static char numbuf[80];
 
 	if (n1 == 0 && n2 == 0) {
@@ -197,8 +146,8 @@ char * weapon::num(register int n1, register int n2) {
 
 void weapon::wield()
 {
-	register struct linked_list *item;
-	register struct object *obj, *oweapon;
+	struct linked_list *item;
+	struct object *obj, *oweapon;
 
 	oweapon =cur_weapon;
 	if (!dropcheck(cur_weapon)) {
@@ -232,8 +181,8 @@ void weapon::wield()
 }
 
 //pick a random position around the give (y, x) coordinates
-void weapon::fallpos(register coord *pos, register coord *newpos, register bool passages) {
-	register int y, x, cnt, ch;
+void weapon::fallpos(coord *pos, coord *newpos, bool passages) {
+	int y, x, cnt, ch;
 
 	cnt = 0;
 	for (y = pos->y - 1; y <= pos->y +1; y++) {
